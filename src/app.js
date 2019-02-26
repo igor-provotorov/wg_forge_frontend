@@ -22,8 +22,8 @@ export default (function () {
 		</thead>
 		<tbody>
 			<tr>
-				<td>1</td>
-				<td>ae35d511-b468-44b4-8529-b3574cd6d319</td>
+				<td>Transaction ID</td>
+				<td>User Info</td>
 				<td>Order Date</td>
 				<td>Order Amount</td>
 				<td>Card Number</td>
