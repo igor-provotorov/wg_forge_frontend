@@ -1,12 +1,11 @@
 import orders from '../data/orders.json';
-import users from '../data/users.json';
-//import 'companies' from '../data/companies.json';
+import {formatCardNumber, formatDate, createUserInfo} from './components/helpers.js';
 
 export default (function () {
-  const table = document.getElementById("app");
+  const app = document.getElementById("app");
 
-  table.innerHTML =
-  `<table border="1" cellspacing="0">
+  app.innerHTML =
+    `<table border="1" cellspacing="0">
     <thead>
       <tr>
         <th>Transaction ID</th>
@@ -22,36 +21,50 @@ export default (function () {
     </tbody>
   </table>`;
 
+  orders.forEach(order => {
+    const tr = document.createElement('tr');
+    tr.id = `order_${order.id}`;
 
-  const formatCardNumber = (number) => {
-    let formatNumber = number.replace(/(?<=\d{2})\d(?=\d{4})/g, '*');
-    return formatNumber;
-  }
+    // Transaction ID
+    const transactionId = document.createElement('td');
+    transactionId.innerText = `${order.transaction_id}`;
+    tr.appendChild(transactionId);
 
-  const formatDate = (seconds) => {
-    let date = new Date(seconds*1000);
-    let day = date.getDate();
-    let month = date.getMonth() + 1;
-    let year = date.getFullYear();
-    return `${day > 9 ? day : `0${day}` }/${month > 9 ? month : `0${month}`}/${year}, ${date.toLocaleTimeString("en-US")}`;
-  }
+    // User Info
+    const userInfo = document.createElement('td');
+    userInfo.classList.add('user-data');
+    createUserInfo(userInfo, order.user_id);
+    tr.appendChild(userInfo);
 
-  const tbody = document.getElementById('tbody');
+    // Order Date
+    const orderDate = document.createElement('td');
+    let time = formatDate(`${order.created_at}`);
+    orderDate.innerText = time;
+    tr.appendChild(orderDate);
 
-  for (let i = 0; i < orders.length; i++) {
-    let time = formatDate(orders[i].created_at);
-    let card = formatCardNumber(orders[i].card_number);
+    // Order Amount
+    const orderAmount = document.createElement('td');
+    orderAmount.innerText = `$${order.total}`;
+    tr.appendChild(orderAmount);
 
-    tbody.innerHTML+=
-    `<tr id="order_${orders[i].id}">
-      <td>${orders[i].id}</td>
-      <td class="user_data">${orders[i].user_id}</td>
-      <td>${time}</td>
-      <td>$${orders[i].total}</td>
-      <td>${card}</td>
-      <td>${orders[i].card_type}</td>
-      <td>${orders[i].order_country} (${orders[i].order_ip})</td>
-    </tr>`;
-  };
+    // Card Number
+    const cardNumber = document.createElement('td');
+    let formatedNumber = formatCardNumber(`${order.card_number}`);
+    cardNumber.innerText = formatedNumber; 
+    tr.appendChild(cardNumber);        
+
+    // Card Type
+    const cardType = document.createElement('td');
+    cardType.innerText = `${order.card_type}`;
+    tr.appendChild(cardType);
+
+    // Location
+    const location = document.createElement('td');
+    location.innerText = `${order.order_country} (${order.order_ip})`;
+    tr.appendChild(location);
+
+
+    document.getElementById('tbody').appendChild(tr);
+  });
 
 }());
