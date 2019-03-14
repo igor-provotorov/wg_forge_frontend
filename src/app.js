@@ -1,11 +1,11 @@
 import orders from '../data/orders.json';
-import {formatCardNumber, formatDate, createUserInfo} from './components/helpers.js';
+import {getUser, getCompany, getCompanyInfo, getGenderInfo, formatCardNumber, formatDate, getBirthdayDate} from './components/helpers.js';
 
 export default (function () {
   const app = document.getElementById("app");
 
   app.innerHTML =
-    `<table border="1" cellspacing="0">
+  `<table border="1" cellspacing="0">
     <thead>
       <tr>
         <th>Transaction ID</th>
@@ -22,49 +22,42 @@ export default (function () {
   </table>`;
 
   orders.forEach(order => {
+    let user = getUser(order.user_id);
+    let company = getCompany(user.company_id);
+
     const tr = document.createElement('tr');
     tr.id = `order_${order.id}`;
 
-    // Transaction ID
-    const transactionId = document.createElement('td');
-    transactionId.innerText = `${order.transaction_id}`;
-    tr.appendChild(transactionId);
-
-    // User Info
-    const userInfo = document.createElement('td');
-    userInfo.classList.add('user-data');
-    createUserInfo(userInfo, order.user_id);
-    tr.appendChild(userInfo);
-
-    // Order Date
-    const orderDate = document.createElement('td');
-    let time = formatDate(`${order.created_at}`);
-    orderDate.innerText = time;
-    tr.appendChild(orderDate);
-
-    // Order Amount
-    const orderAmount = document.createElement('td');
-    orderAmount.innerText = `$${order.total}`;
-    tr.appendChild(orderAmount);
-
-    // Card Number
-    const cardNumber = document.createElement('td');
-    let formatedNumber = formatCardNumber(`${order.card_number}`);
-    cardNumber.innerText = formatedNumber; 
-    tr.appendChild(cardNumber);        
-
-    // Card Type
-    const cardType = document.createElement('td');
-    cardType.innerText = `${order.card_type}`;
-    tr.appendChild(cardType);
-
-    // Location
-    const location = document.createElement('td');
-    location.innerText = `${order.order_country} (${order.order_ip})`;
-    tr.appendChild(location);
-
+    tr.innerHTML = `
+    <td>${order.transaction_id}</td>
+    <td class="user-data">
+      <a href="#" id="user-link">${getGenderInfo(user)}</a>
+        <div class="user-details" style="display:none">
+          <p>Birthday: ${getBirthdayDate(+user.birthday)}</p>
+          <p><img src="${user.avatar}" width="100"></p>
+          ${getCompanyInfo(company)}
+        </div>
+    </td>
+    <td>${formatDate(order.created_at)}</td>
+    <td>$${order.total}</td>
+    <td>${formatCardNumber(order.card_number)}</td>
+    <td>${order.card_type}</td>
+    <td>${order.order_country} (${order.order_ip})</td>`
 
     document.getElementById('tbody').appendChild(tr);
+  });
+
+  let tbody = document.getElementById('tbody');
+  tbody.addEventListener('click', (evt) => {
+    evt.preventDefault();
+    if (evt.target.id === 'user-link') {
+      let target = evt.target.nextElementSibling.style.display;
+      if (target === 'none') {
+        evt.target.nextElementSibling.style.display = 'block';
+      } else {
+        evt.target.nextElementSibling.style.display = 'none';
+      }
+    }
   });
 
 }());
