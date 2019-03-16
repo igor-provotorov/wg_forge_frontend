@@ -58,4 +58,19 @@ const getBirthdayDate = (seconds) => {
   }
 };
 
-export {getUser, getCompany, getCompanyInfo, getGenderInfo, formatCardNumber, formatDate, getBirthdayDate};
+const showUserDetails = () => {
+  let tbody = document.getElementById('tbody');
+  tbody.addEventListener('click', (evt) => {
+    if (evt.target.id === 'user-link') {
+      evt.preventDefault();
+      let target = evt.target.nextElementSibling.style.display;
+      if (target === 'none') {
+        evt.target.nextElementSibling.style.display = 'block';
+      } else {
+        evt.target.nextElementSibling.style.display = 'none';
+      }
+    }
+  })
+};
+
+export {getUser, getCompany, getCompanyInfo, getGenderInfo, formatCardNumber, formatDate, getBirthdayDate, showUserDetails};
