@@ -1,5 +1,7 @@
 import orders from '../data/orders.json';
-import {getUser, getCompany, getCompanyInfo, getGenderInfo, formatCardNumber, formatDate, getBirthdayDate} from './components/helpers.js';
+import compare from './components/sort.js';
+import createTable from './components/createTable.js';
+
 
 export default (function () {
   const app = document.getElementById("app");
@@ -8,44 +10,20 @@ export default (function () {
   `<table border="1" cellspacing="0">
     <thead>
       <tr>
-        <th>Transaction ID</th>
-        <th>User Info</th>
-        <th>Order Date</th>
-        <th>Order Amount</th>
+        <th data-cell="transaction_id" style="cursor:pointer">Transaction ID</th>
+        <th data-cell="user_info" style="cursor:pointer">User Info</th>
+        <th data-cell="order_date" style="cursor:pointer">Order Date</th>
+        <th data-cell="order_amount" style="cursor:pointer">Order Amount</th>
         <th>Card Number</th>
-        <th>Card Type</th>
-        <th>Location</th>
+        <th data-cell="card_type" style="cursor:pointer">Card Type</th>
+        <th data-cell="location" style="cursor:pointer">Location</th>
       </tr>
     </thead>
     <tbody id="tbody">
     </tbody>
   </table>`;
 
-  orders.forEach(order => {
-    let user = getUser(order.user_id);
-    let company = getCompany(user.company_id);
-
-    const tr = document.createElement('tr');
-    tr.id = `order_${order.id}`;
-
-    tr.innerHTML = `
-    <td>${order.transaction_id}</td>
-    <td class="user-data">
-      <a href="#" id="user-link">${getGenderInfo(user)}</a>
-        <div class="user-details" style="display:none">
-          <p>Birthday: ${getBirthdayDate(+user.birthday)}</p>
-          <p><img src="${user.avatar}" width="100"></p>
-          ${getCompanyInfo(company)}
-        </div>
-    </td>
-    <td>${formatDate(order.created_at)}</td>
-    <td>$${order.total}</td>
-    <td>${formatCardNumber(order.card_number)}</td>
-    <td>${order.card_type}</td>
-    <td>${order.order_country} (${order.order_ip})</td>`
-
-    document.getElementById('tbody').appendChild(tr);
-  });
+  createTable(orders);
 
   let tbody = document.getElementById('tbody');
   tbody.addEventListener('click', (evt) => {
@@ -57,6 +35,33 @@ export default (function () {
       } else {
         evt.target.nextElementSibling.style.display = 'none';
       }
+    }
+  });
+
+  let thead = document.querySelector('tr');
+  thead.addEventListener('click', (evt) => {
+    const dataCell = evt.target.getAttribute('data-cell');
+    if (dataCell) {
+      thead.innerHTML = `
+      <tr>
+        <th data-cell="transaction_id" style="cursor:pointer">Transaction ID</th>
+        <th data-cell="user_info" style="cursor:pointer">User Info</th>
+        <th data-cell="order_date" style="cursor:pointer">Order Date</th>
+        <th data-cell="order_amount" style="cursor:pointer">Order Amount</th>
+        <th>Card Number</th>
+        <th data-cell="card_type" style="cursor:pointer">Card Type</th>
+        <th data-cell="location" style="cursor:pointer">Location</th>
+      </tr>`;
+
+      let arrow = document.createElement('span');
+      arrow.innerHTML = ' &#8595;';
+      document.querySelector(`th[data-cell="${dataCell}"]`).appendChild(arrow);
+      document.querySelector(`th[data-cell="${dataCell}"]`).style.background = '#3333';
+
+      let tableCells = document.querySelectorAll(`td[data-table-cell="${dataCell}"]`);
+      let firstCell = tableCells[0].dataset.tableCell;
+      tbody.innerHTML = '';
+      createTable(compare(firstCell));
     }
   });
 
